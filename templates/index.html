@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPI MONITOR DASHBOARD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div id="title">
+        <h1>RPI MONITOR DASHBOARD</h1>
+    </div>
+    <div id="content">
+        <div id="infos">
+            <div id="cpu">
+                <img src="{{ url_for('static', filename='IMG/cpu.png') }}" alt="">
+                <div>
+                    <p id="cpuname">{{ cpu_name }}</p>
+                    <p id="temperature">{{ temperature }}ºC</p>
+                    <p id="freq">{{ cpu_freq }}</p>
+                </div>
+            </div>
+            <div id="ram">
+                <img src="{{ url_for('static', filename='IMG/ram.png') }}" alt="">
+                <div>
+                    <p id="quant">{{ ram_quant }} TOTAL</p>
+                    <p id="ramusage">{{ ram_usage }}</p>
+                    <p id="process">{{ process }} Process</p>
+                </div>
+            </div>
+            <div id="gpu">
+                <img src="{{ url_for('static', filename='IMG/gpu.png') }}" alt="">
+                <div>
+                    <p id="gpu_mem">MEM: {{ gpu_mem }}</p>
+                </div>
+            </div>
+        </div>
+        <div>
+        <div id="temperature_fan">
+            <img src="{{ url_for('static', filename='gif/' + gif_file) }}" alt="GIF de temperatura">
+            <div id="temperature-graph"></div>
+        </div>
+    </div>
+    </div>
+    <script>
+        function fetchTemperatureData() {
+            $.getJSON('/temperature-data', function(data) {
+                var trace = {
+                    x: data.timestamps,
+                    y: data.temperatures,
+                    mode: 'lines+markers',
+                    type: 'scatter'
+                };
+    
+                var layout = {
+                    title: 'Temperatura do Processador ao Longo do Tempo',
+                    xaxis: { 
+                        title: 'Horário',
+                        color: 'white'  // Cor do texto dos eixos X
+                    },
+                    yaxis: { 
+                        title: 'Temperatura (°C)',
+                        color: 'white'  // Cor do texto dos eixos Y
+                    },
+                    paper_bgcolor: 'black',  // Cor de fundo do gráfico
+                    plot_bgcolor: 'black',   // Cor de fundo do gráfico (área onde os dados são exibidos)
+                    titlefont: { color: 'white' },  // Cor do título
+                    xaxis: {
+                        tickfont: { color: 'white' },  // Cor dos rótulos dos eixos X
+                    },
+                    yaxis: {
+                        tickfont: { color: 'white' }   // Cor dos rótulos dos eixos Y
+                    }
+                };
+    
+                var plotData = [trace];
+    
+                Plotly.newPlot('temperature-graph', plotData, layout);
+            });
+        }
+        function reloadPage() {
+            setInterval(function() {
+		location.reload();
+            }, 2500);
+        }
+	fetchTemperatureData();
+        // Chama a função para iniciar o recarregamento
+        window.onload = reloadPage;
+    </script>    
+</body>
+</html>
